@@ -1,0 +1,3 @@
+# Analysis of the problem
+
+Systematically analysis the problem. For example, is this this problem full-observerable? Deterministic? ...
