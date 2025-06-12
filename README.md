@@ -1,4 +1,4 @@
-# Azul Project Template
+# Azul Project
 
 You must fully and carefully read the assignment specification and instructions detailed in this file. You are NOT to modify this file in any way.
 
