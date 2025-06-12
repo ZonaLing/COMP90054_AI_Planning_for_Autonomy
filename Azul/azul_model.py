@@ -7,9 +7,9 @@ import Azul.azul_utils as utils
 
 
 class AzulState(GameState):
-    NUM_FACTORIES = [5,7,9]
-    NUM_TILE_TYPE = 20
-    NUM_ON_FACTORY = 4
+    NUM_FACTORIES = [5,7,9] #factory types
+    NUM_TILE_TYPE = 20 #each tile type has 20 tiles
+    NUM_ON_FACTORY = 4 #each factory contains 4 tiles
 
 
     class TileDisplay:
@@ -21,10 +21,8 @@ class AzulState(GameState):
             self.total = 0
 
             for tile in utils.Tile:
-                # 0 tiles initially
-                self.tiles[tile] = 0 
+                self.tiles[tile] = 0
 
-        # take tiles from the place that calls it
         def ReactionTiles(self, number, tile_type):
             assert number > 0
             assert tile_type in utils.Tile
@@ -46,17 +44,17 @@ class AzulState(GameState):
 
 
     class AgentState:
-        GRID_SIZE = 5 # width/height of the grid
-        FLOOR_SCORES = [-1,-1,-2,-2,-2,-3,-3] # scores of each position in the floor line
-        ROW_BONUS = 2  # a row on wall
-        COL_BONUS = 7  # a column on wall
-        SET_BONUS = 10 # collect one color in every row on the wall
+        GRID_SIZE = 5
+        FLOOR_SCORES = [-1,-1,-2,-2,-2,-3,-3]
+        ROW_BONUS = 2
+        COL_BONUS = 7
+        SET_BONUS = 10
 
         def __init__(self, _id):
             self.id = _id
             self.score = 0
-            self.lines_number = [0]*self.GRID_SIZE # [0, 0, 0, 0, 0] each number means the number of tiles in this pattern line
-            self.lines_tile = [-1]*self.GRID_SIZE  # [color, color, color, color, color]
+            self.lines_number = [0]*self.GRID_SIZE
+            self.lines_tile = [-1]*self.GRID_SIZE
 
             self.agent_trace = utils.AgentTrace(_id)
 
@@ -67,8 +65,6 @@ class AzulState(GameState):
             #    [Tile.RED,Tile.BLACK,Tile.WHITE,Tile.BLUE,Tile.YELLOW],
             #    [Tile.YELLOW,Tile.RED,Tile.BLACK,Tile.WHITE,Tile.BLUE]
             #]
-
-            # position of each color of tile on the wall
             self.grid_scheme = numpy.zeros((self.GRID_SIZE,self.GRID_SIZE))
             self.grid_scheme[0][utils.Tile.BLUE] = 0
             self.grid_scheme[1][utils.Tile.BLUE] = 1
@@ -135,11 +131,12 @@ class AzulState(GameState):
             assert line >= 0 and line < self.GRID_SIZE
 
             assert (self.lines_tile[line] == -1 or 
-                self.lines_tile[line] == tile_type) # pattern line is empty or with this color
+                self.lines_tile[line] == tile_type)
+
             self.lines_number[line] += number
             self.lines_tile[line] = tile_type
 
-            assert self.lines_number[line] <= line + 1 # check the tiles don't exceed the capacity of this pattern line
+            assert self.lines_number[line] <= line + 1 
 
 
         # Assign first agent token to this agent
@@ -198,7 +195,6 @@ class AzulState(GameState):
         def ScoreRound(self):
             used_tiles = []
 
-            # score incerease?
             score_inc = 0
 
             # 1. Action tiles across from pattern lines to the wall grid
@@ -206,7 +202,7 @@ class AzulState(GameState):
                 # Is the pattern line full? If not it persists in its current
                 # state into the next round.
                 if self.lines_number[i] == i+1:
-                    tc = self.lines_tile[i] # tc = tile color
+                    tc = self.lines_tile[i]
                     col = int(self.grid_scheme[i][tc])
 
                     # Record that the agent has placed a tile of type 'tc'
@@ -221,7 +217,7 @@ class AzulState(GameState):
                     self.lines_tile[i] = -1
                     self.lines_number[i] = 0
 
-                    # Tile will be placed at position (i,col) in grid (on wall)
+                    # Tile will be placed at position (i,col) in grid
                     self.grid_state[i][col] = 1
 
                     # count the number of tiles in a continguous line
@@ -274,7 +270,7 @@ class AzulState(GameState):
             for i in range(len(self.floor)):
                 penalties += self.floor[i]*self.FLOOR_SCORES[i]
                 self.floor[i] = 0
-            # put the tiles on the floor in the end of used_tiles and clear the floor    
+                
             used_tiles.extend(self.floor_tiles)
             self.floor_tiles = []
             
@@ -283,7 +279,6 @@ class AzulState(GameState):
             if score_change < 0 and self.score < -score_change:
                 score_change = -self.score
             
-            # the min score is 0
             self.score += score_change
             self.agent_trace.round_scores[-1] = score_change
 
@@ -308,11 +303,10 @@ class AzulState(GameState):
         # Create agent states
         self.agents = []
         for i in range(num_agents):
-            ps = self.AgentState(i) # i is the id
+            ps = self.AgentState(i)
             self.agents.append(ps)
             
         # Tile bag contains NUM_TILE_TYPE of each tile colour
-        # 20 tiles of each color
         self.bag = []
         for i in range(self.NUM_TILE_TYPE):
             self.bag.append(utils.Tile.BLUE)
@@ -325,7 +319,7 @@ class AzulState(GameState):
         random.shuffle(self.bag)
 
         # "Used" bag is initial empty
-        self.bag_used = [] # lid?
+        self.bag_used = []
 
         # In a 2/3/4-agent game, 5/7/9 factory displays are used
         self.factories = []
@@ -394,7 +388,7 @@ class AzulGameRule(GameRule):
         return utils.ValidAction(m, actions)
 
     def initialGameState(self):
-        self.current_agent_index = self.num_of_agent # always 2
+        self.current_agent_index = self.num_of_agent
         return AzulState(self.num_of_agent)
 
     def generateSuccessor(self, state, action, agent_id):
@@ -422,10 +416,9 @@ class AzulGameRule(GameRule):
             if action[0] == utils.Action.TAKE_FROM_CENTRE: 
                 tg = action[2]
 
-                # give the starting player marker to this agent 
                 if not state.first_agent_taken:
                     plr_state.GiveFirstAgentToken()
-                    state.first_agent_taken = True # this state is AzulState
+                    state.first_agent_taken = True
                     state.next_first_agent = agent_id
 
                 if tg.num_to_floor_line > 0:
@@ -442,10 +435,8 @@ class AzulGameRule(GameRule):
                 # Reaction tiles from the centre
                 state.centre_pool.ReactionTiles(tg.number, tg.tile_type)
 
-            # the agent is taking tiles from the factory
             elif action[0] == utils.Action.TAKE_FROM_FACTORY:
                 tg = action[2]
-                # add tile in the floor line
                 if tg.num_to_floor_line > 0:
                     ttf = []
                     for i in range(tg.num_to_floor_line):
@@ -453,13 +444,11 @@ class AzulGameRule(GameRule):
                     plr_state.AddToFloor(ttf)
                     state.bag_used.extend(ttf)
 
-                # add tiles in the pattern line
                 if tg.num_to_pattern_line > 0:
                     plr_state.AddToPatternLine(tg.pattern_line_dest, 
                         tg.num_to_pattern_line, tg.tile_type)
 
                 # Reaction tiles from the factory display
-                # subtract tiles taken from the factory?
                 fid = action[1]
                 fac = state.factories[fid]
                 fac.ReactionTiles(tg.number,tg.tile_type)
@@ -474,19 +463,19 @@ class AzulGameRule(GameRule):
         return state
     
     def getNextAgentIndex(self):
-        if not self.current_game_state.TilesRemaining(): # no tiles remaining
-            return self.num_of_agent                     # 2
-        if self.current_agent_index == self.num_of_agent:# it's 2 and the next one will be the first agent
-            return self.current_game_state.first_agent   # 0 or 1
-        return (self.current_agent_index + 1) % self.num_of_agent # 1 or 0
-    # end the game when a player completed at least one row
+        if not self.current_game_state.TilesRemaining():
+            return self.num_of_agent
+        if self.current_agent_index == self.num_of_agent:
+            return self.current_game_state.first_agent
+        return (self.current_agent_index + 1) % self.num_of_agent
+
     def gameEnds(self):
         for plr_state in self.current_game_state.agents:
             completed_rows = plr_state.GetCompletedRows()
             if completed_rows > 0:
                 return True
         return False
-    # calculate final scores
+
     def calScore(self, game_state,agent_id):
         game_state.agents[agent_id].EndOfGameScore()
         return game_state.agents[agent_id].score
@@ -494,7 +483,6 @@ class AzulGameRule(GameRule):
     def getLegalActions(self, game_state, agent_id):
         actions = []
 
-        # no remaining tiles and no first agent assigned
         if not game_state.TilesRemaining() and not game_state.next_first_agent == -1:
             return ["ENDROUND"]
         elif agent_id == self.num_of_agent:
@@ -504,11 +492,11 @@ class AzulGameRule(GameRule):
 
             # Look at each factory display with available tiles
             fid = 0
-            for fd in game_state.factories: # fd means factory display?
-                # Look at each available tile set (color)
+            for fd in game_state.factories:
+                # Look at each available tile set
                 for tile in utils.Tile:
-                    num_avail = fd.tiles[tile] # number of tiles available to put in a pattern line
-                    # no tiles of this color, skip this factory
+                    num_avail = fd.tiles[tile]
+                
                     if num_avail == 0:
                         continue
 
@@ -521,7 +509,6 @@ class AzulGameRule(GameRule):
                     # those that cannot be placed added to the floor line).
                     for i in range(agent_state.GRID_SIZE):
                         # Can tiles be added to pattern line i?
-                        # this pattern line isn't empty and the color of the tile in this line is different
                         if agent_state.lines_tile[i] != -1 and \
                             agent_state.lines_tile[i] != tile:
                             # these tiles cannot be added to this pattern line
@@ -529,22 +516,20 @@ class AzulGameRule(GameRule):
 
                         # Is the space on the grid for this tile already
                         # occupied?
-                        grid_col = int(agent_state.grid_scheme[i][tile]) # the position of that color on the wall
+                        grid_col = int(agent_state.grid_scheme[i][tile])
                         if agent_state.grid_state[i][grid_col] == 1:
                             # It is, so we cannot place this tile type
                             # in this pattern line!
                             continue
 
-                        # free slots are different for each pattern line that can be partially full or empty
                         slots_free = (i+1) - agent_state.lines_number[i]
-                        tg = utils.TileGrab() # a class, store information in this class to grab a tile
+                        tg = utils.TileGrab()
                         tg.number = num_avail
                         tg.tile_type = tile
                         tg.pattern_line_dest = i
                         tg.num_to_pattern_line = min(num_avail, slots_free)
                         tg.num_to_floor_line = tg.number - tg.num_to_pattern_line
 
-                        # grab the tile(s)
                         actions.append((utils.Action.TAKE_FROM_FACTORY, fid, tg))
             
                     # Default action is to place all the tiles in the floor line
@@ -602,5 +587,4 @@ class AzulGameRule(GameRule):
                 tg.num_to_floor_line = tg.number
                 actions.append((utils.Action.TAKE_FROM_CENTRE, -1, tg))
 
-            # print(actions)
             return actions

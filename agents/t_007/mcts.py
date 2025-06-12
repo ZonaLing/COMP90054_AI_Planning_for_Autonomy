@@ -3,7 +3,6 @@ from copy import deepcopy
 import math
 from collections import defaultdict
 import numpy as np
-from Azul.azul_model import AzulGameRule as GameRule
 
 NUM_PLAYERS = 2
 
@@ -59,7 +58,6 @@ class MCTSNode(object):
             tg = actions[2]
             grid_row = tg.pattern_line_dest
             
-            
             tiles_to_fill_row = sum(agent_state.grid_state[grid_row][col] == 1 for col in range(agent_state.GRID_SIZE))
 
             if tiles_to_fill_row == agent_state.GRID_SIZE - 1:
@@ -79,7 +77,6 @@ class MCTSNode(object):
             tg = actions[2]
             grid_col = int(agent_state.grid_scheme[tg.pattern_line_dest][tg.tile_type])
             
-            
             tiles_to_fill_column = sum(agent_state.grid_state[row][grid_col] == 1 for row in range(agent_state.GRID_SIZE))
 
             if tiles_to_fill_column == agent_state.GRID_SIZE - 1:
@@ -98,7 +95,6 @@ class MCTSNode(object):
         if actions[0] == utils.Action.TAKE_FROM_CENTRE or actions[0] == utils.Action.TAKE_FROM_FACTORY :
             tg = actions[2]
             tile_type = tg.tile_type
-            
             
             tiles_to_fill_set = sum(agent_state.grid_state[row][col] == 1 and agent_state.grid_scheme[row][col] == tile_type
                                     for row in range(agent_state.GRID_SIZE)
@@ -162,7 +158,6 @@ class MCTSNode(object):
             action = self.rollout_policy(legal_action)
             current_simulation_state = self.DoAction(current_simulation_state, action)
             
-        
         # calculate the score at the end of each round for comparison
         current_simulation_state.ExecuteEndOfRound()
         agent_score = self.state.agents[self.id].EndOfGameScore()
@@ -249,15 +244,3 @@ class MCTSNode(object):
         num_actions = len(sorted_actions)
         sorted_actions = sorted_actions[0: math.ceil(num_actions / 10)]
         return sorted_actions
-    
-class myAgent():
-    def __init__(self, _id):
-        self.id = _id # Agent needs to remember its own id.
-        self.game_rule = GameRule(NUM_PLAYERS) # Agent stores an instance of GameRule, from which to obtain functions.
-    
-    # Select the actions that lead to maximum points for each round and the final game
-    # MCTS stage 1: select
-    def SelectAction(self,actions,rootstate):
-        root = MCTSNode(self.id, state=rootstate, game_rule=self.game_rule)
-        selected_action = root.best_action(simulations = 300)
-        return selected_action

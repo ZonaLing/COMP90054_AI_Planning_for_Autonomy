@@ -89,7 +89,7 @@ class Minimax:
         sorted_actions = sorted(available_actions, key= lambda x: (x[2].num_to_floor_line, -x[2].num_to_pattern_line))
         
         num_actions = len(sorted_actions)
-        # reduce the number of actions by a factor of a if there are too many actions to explore
+        # reduce the number of actions by a factor of 3 if there are too many actions to explore
         if num_actions > 27: 
             a = 3
         else:

@@ -37,10 +37,8 @@ class myAgent():
     def DoAction(self, state, action):
         score = state.agents[self.id].score
         state = self.game_rule.generateSuccessor(state, action, self.id)
-
-        # change this state to be the current state
-        self.game_rule.current_game_state = state
-        goal_reached = self.game_rule.gameEnds() #TODO: Students, how should agent check whether it reached goal or not
+        
+        goal_reached = False #TODO: Students, how should agent check whether it reached goal or not
         
         return goal_reached
 
@@ -60,7 +58,7 @@ class myAgent():
                 next_path  = path + [a]                   # Add this action to the path.
                 goal     = self.DoAction(next_state, a) # Carry out this action on the state, and check for goal
                 if goal:
-                    # print(f'Move {self.turn_count}, path found:', next_path)
+                    print(f'Move {self.turn_count}, path found:', next_path)
                     return next_path[0] # If the current action reached the goal, return the initial action that led there.
                 else:
                     queue.append((next_state, next_path)) # Else, simply add this state and its path to the queue.

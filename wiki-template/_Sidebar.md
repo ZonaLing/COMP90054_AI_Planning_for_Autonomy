@@ -1,4 +1,4 @@
-1. [Home and Introduction](https://github.com/COMP90054-2024s2/a3-happynhecticazul/wiki)
+1. [Home and Introduction](https://github.com/COMP90054-classroom/pacman-contest-agent/wiki)
 2. [Problem Analysis](Problem-Analysis)
 
     2.1 [Approach One](AI-Method-1)
